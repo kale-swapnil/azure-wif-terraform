@@ -25,3 +25,9 @@ variable "client_id" {
   default     = ""
   
 }
+
+variable "subscription_id" {
+  type        = string
+  description = "Azure subscription ID where resources will be created"
+  default     = ""
+}

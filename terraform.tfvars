@@ -8,3 +8,5 @@ branch = "main"
 
 # Resource ID of your existing Azure Key Vault
 key_vault_id = "/subscriptions/366d84a8-7475-45d4-97d3-f44d0f00d92a/resourceGroups/terraform-oidc/providers/Microsoft.KeyVault/vaults/terraform-oidc"
+
+subscription_id = "366d84a8-7475-45d4-97d3-f44d0f00d92a"

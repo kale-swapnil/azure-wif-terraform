@@ -1,5 +1,6 @@
 provider "azurerm" {
   features {}   
+  subscription_id = var.subscription_id
 }
 
 provider "azuread" {
@@ -35,14 +36,14 @@ resource "azuread_application_federated_identity_credential" "ci" {
 module "wif_identity" {
   source                   = "./modules/workload-identity"
   identity_name            = var.identity_name
-  application_id           = azuread_application.terraform_app.application_id
+  application_id           = azuread_application.terraform_app.id
   federation_provider_id   = azuread_application_federated_identity_credential.ci.id
   audiences                = ["api://AzureADTokenExchange"]
   subject                  = azuread_application_federated_identity_credential.ci.subject
   azure_role_definition    = data.azurerm_role_definition.contributor.id
   scope                    = data.azurerm_subscription.primary.id
   key_vault_id             = var.key_vault_id
-  client_id = var.client_id
+  client_id = azuread_application.terraform_app.client_id
 }
 
 # Generate SP password and auto-rotate via Key Vault

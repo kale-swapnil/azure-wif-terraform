@@ -7,5 +7,5 @@ output "sp_object_id" {
 }
 
 output "federated_credential_id" {
-  value = azuread_federated_identity_credential.this.id
+  value = azuread_application_federated_identity_credential.this.id
 }

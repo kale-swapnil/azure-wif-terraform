@@ -5,18 +5,20 @@ resource "azuread_service_principal" "this" {
 }
 
 
-resource "azuread_federated_identity_credential" "this" {
-  name                          = "${var.identity_name}-federation"
-  service_principal_id          = azuread_service_principal.this.id
-  workload_identity_provider_id = var.federation_provider_id
+resource "azuread_application_federated_identity_credential" "this" {
   audiences                     = var.audiences
   subject                       = var.subject
+  application_id = var.application_id
+  display_name          = "${var.identity_name}-federation"
+  issuer                = "https://token.actions.githubusercontent.com//"
+
+  
 }
 
 resource "azurerm_role_assignment" "this" {
   scope              = var.scope
   role_definition_id = var.azure_role_definition
-  principal_id       = azuread_service_principal.this.id
+  principal_id       = azuread_service_principal.this.object_id
 }
 
 resource "azurerm_key_vault_access_policy" "kv_policy" {
