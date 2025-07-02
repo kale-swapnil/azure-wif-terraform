@@ -1,8 +1,9 @@
 resource "azuread_service_principal" "this" {
   #application_id = var.application_id
-  display_name   = var.identity_name
+  #display_name   = var.identity_name
   client_id = var.client_id
 }
+
 
 resource "azuread_federated_identity_credential" "this" {
   name                          = "${var.identity_name}-federation"
@@ -24,7 +25,7 @@ resource "azurerm_key_vault_access_policy" "kv_policy" {
   tenant_id     = data.azurerm_client_config.current.tenant_id
   object_id     = azuread_service_principal.this.object_id
   secret_permissions = [
-    "get",
-    "list"
+    "Get",
+    "List"
   ]
 }

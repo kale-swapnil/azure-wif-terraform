@@ -10,7 +10,7 @@ data "azurerm_subscription" "primary" {
   
 }
 
-data "azurerm_role_definition" "name" {
+data "azurerm_role_definition" "contributor" {
   name = "Contributor"
 }
 
@@ -21,13 +21,14 @@ resource "azuread_application" "terraform_app" {
 }
 
 #OIDC federation provider
-resource "azuread_workload_identity_provider" "ci" {
-    name = "github-actions-wif"
-    issuer = "https://token.actions.githubusercontent.com"
-    subject = "repo:${var.repo}:ref:refs/heads/${var.branch}"
-    client_id_list = [azuread_application.terraform_app.application_id]
-  
+resource "azuread_application_federated_identity_credential" "ci" {
+  application_id = azuread_application.terraform_app.id
+  display_name          = "github-actions-oidc"
+  audiences             = ["api://AzureADTokenExchange"]
+  issuer                = "https://token.actions.githubusercontent.com"
+  subject               = "repo:your-org/your-repo:ref:refs/heads/main"
 }
+
 
 #Federated Identity + RBAC using module 
 
@@ -35,9 +36,9 @@ module "wif_identity" {
   source                   = "./modules/workload-identity"
   identity_name            = var.identity_name
   application_id           = azuread_application.terraform_app.application_id
-  federation_provider_id   = azuread_workload_identity_provider.ci.id
+  federation_provider_id   = azuread_application_federated_identity_credential.ci.id
   audiences                = ["api://AzureADTokenExchange"]
-  subject                  = azuread_workload_identity_provider.ci.subject
+  subject                  = azuread_application_federated_identity_credential.ci.subject
   azure_role_definition    = data.azurerm_role_definition.contributor.id
   scope                    = data.azurerm_subscription.primary.id
   key_vault_id             = var.key_vault_id
@@ -52,7 +53,7 @@ resource "random_password" "sp_password" {
 
 resource "azuread_service_principal_password" "sp_password" {
   service_principal_id = module.wif_identity.sp_id
-  value                = random_password.sp_password.result
+ 
 }
 
 resource "azurerm_key_vault_secret" "sp_credential" {
